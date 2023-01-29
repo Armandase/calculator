@@ -69,7 +69,7 @@ fn pars_line(line :&str){
             return 
         }
     }
-    let array = collect_number(line);
+    let mut array = collect_number(line);
     apply_calcul(&array, sep);
 }
 
@@ -89,42 +89,29 @@ fn collect_number(line :&str) -> Vec<f64>{
 
 fn apply_calcul(array :&Vec<f64>, sep :Vec<&str>)
 {
+    let mut i: usize = 0;
     let mut _result :f64 = 0.0;
-    let mut new = array.clone();
-    let mut op = sep.clone();
+    let mut new;
 
-    loop{
+    while i < array.len(){
+        new = array.clone();
         let mut prio: usize = 0;
-        while prio < op.len(){
-            if op[prio] == "*" || op[prio] == "/"
-                || op[prio] == "%" || op[prio] == "^"{
+        while prio < sep.len(){
+            if sep[prio] == "*" || sep[prio] == "/"
+                || sep[prio] == "%" || sep[prio] == "^"{
                break ; 
             }
             prio += 1;
         }
-        if prio == op.len(){
-            prio = 0;
-        }
         new = if prio != 0{
-            let mut cpy = new.clone();
-            let tmp = select_calcul(new[prio], new[prio + 1], sep[prio]);
-            cpy[prio] = tmp;
-            cpy.remove(prio + 1);
-            op.remove(prio);
-            cpy
-        } else {
-            let tmp = select_calcul(new[0], new[1], sep[0]);
-            let mut cpy = new.clone();
-            cpy[0] = tmp;
-            cpy.remove(1);
-            op.remove(0);
+            let tmp = select_calcul(array[prio - 1], array[prio], sep[prio]);
+            let mut cpy = array.clone();
+            cpy[prio - 1] = tmp;
+            cpy.remove(prio);
             cpy
         };
-        if new.len() == 1{
-            break ;
-        }
+        i += 1;
     }
-    println!("{}", new[0]);
 }
 
 fn  select_calcul(var1: f64, var2: f64, sep: &str) -> f64{
