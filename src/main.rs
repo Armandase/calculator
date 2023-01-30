@@ -1,17 +1,18 @@
-use std::io::stdin;
 pub mod operator;
 pub mod utils;
 
 // loop while 
 
 fn main() {
-    println!("MRC 1.0");
-    println!("h for help, q for quit\n");
+    print!("\x1b[100mMRC\x1b[0m");
+    println!(": -> h for help, q for quit\n");
     loop {
-        let mut input = String::new();
-        stdin()
-        .read_line(&mut input)
-        .expect("Error in standard input"); 
+        let mut rl = rustyline::Editor::<()>::new();
+        let readline = rl.readline(">> ");
+        let input = match readline {
+            Ok(line) => line,
+            Err(_) => String::new(),
+        };
         if input.len() == 0 {
             return ;
         }
@@ -42,6 +43,9 @@ fn pars_and_calcul(line :&str){
         }
     }
     let array = collect_number(line);
+    if array.len() == 1{
+        return ;
+    }
     apply_calcul(&array, sep);
 }
 
