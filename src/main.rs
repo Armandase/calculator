@@ -1,60 +1,31 @@
 use std::io::stdin;
 pub mod operator;
+pub mod utils;
 
-//  function to print help ressources
-fn check_help(line :&str) -> bool {
-    let match1 = "h";
-
-    match line.find(match1){
-        None => return false,
-        Some(_) =>{
-            println!("MRC is a minimalist rust calculator.\n");
-            println!("You can use float and theses operators : +, -, *, /, % and ^");
-            println!("Usage :");
-            println!("   q -> quit the program");
-            return true
-        }
-    }
-}
-
-//  parsing function for work without space
-fn rm_whitespace(input :&str) -> String{
-    input
-        .split_whitespace()
-        .collect()
-}
-
-//  check if the code should be quit
-fn check_quit(line :&str) -> bool{
-    let match1 = "q";
-
-    match line.find(match1) {
-        None => (),
-        Some(_) => return true
-    }
-    false
-}
+// loop while 
 
 fn main() {
-    let mut input = String::new();
     println!("MRC 1.0");
     println!("h for help, q for quit\n");
     loop {
-       stdin()
-           .read_line(&mut input)
-           .expect("Error in standard input"); 
-       let mut line = rm_whitespace(&input);
-       if check_quit(&mut line){
-           break ;
-       } else if check_help(&mut line){
+        let mut input = String::new();
+        stdin()
+        .read_line(&mut input)
+        .expect("Error in standard input"); 
+        if input.len() == 0 {
+            return ;
+        }
+        let mut line = utils::rm_whitespace(&input);
+        if utils::check_quit(&mut line){
+            break ;
+        } else if utils::check_help(&mut line){
             continue ;
-       }
-       pars_line(&mut line);
-        input = String::new();
+        }
+        pars_and_calcul(&mut line);
     }
 }
 
-fn pars_line(line :&str){
+fn pars_and_calcul(line :&str){
     let sep: Vec<&str> = line
         .split(['1' , '2', '3', '4', '5', '6', '7', '8', '9', '0', '.'].as_ref())
         .filter(|&x| !x.is_empty())
@@ -66,6 +37,7 @@ fn pars_line(line :&str){
              && byte != "*" && byte != "/"
              && byte != "%" && byte != "^")
         {
+            println!("You can only use digits and operators.");
             return 
         }
     }
@@ -80,7 +52,11 @@ fn collect_number(line :&str) -> Vec<f64>{
     let mut array: Vec<f64> = Vec::new();
     let mut i: usize = 0;
     while i < value.len(){
-        array.push(value[i].parse().expect("Parsing error"));
+        let tmp = value[i].parse();
+        match tmp {
+            Ok(x) => array.push(x),
+            Err(_e) => eprintln!("Operator at begin or end of line")
+        }
         i += 1;
     }
     return array
@@ -107,13 +83,13 @@ fn apply_calcul(array :&Vec<f64>, sep :Vec<&str>)
         }
         new = if prio != 0{
             let mut cpy = new.clone();
-            let tmp = select_calcul(new[prio], new[prio + 1], sep[prio]);
+            let tmp = operator::select_calcul(new[prio], new[prio + 1], op[prio]);
             cpy[prio] = tmp;
             cpy.remove(prio + 1);
             op.remove(prio);
             cpy
         } else {
-            let tmp = select_calcul(new[0], new[1], sep[0]);
+            let tmp = operator::select_calcul(new[0], new[1], op[0]);
             let mut cpy = new.clone();
             cpy[0] = tmp;
             cpy.remove(1);
@@ -127,23 +103,3 @@ fn apply_calcul(array :&Vec<f64>, sep :Vec<&str>)
     println!("{}", new[0]);
 }
 
-fn  select_calcul(var1: f64, var2: f64, sep: &str) -> f64{
-    let ret: f64;
-
-    if sep == "+"{
-        ret = operator::add(var1, var2);
-    } else if sep == "-"{
-        ret = operator::sub(var1, var2);
-    } else if sep == "*"{
-        ret = operator::mult(var1, var2);
-    } else if sep == "/"{
-        ret = operator::div(var1, var2);
-    } else if sep == "%"{
-        ret = operator::modulo(var1, var2);
-    } else if sep == "^"{
-        ret = operator::exponent(var1, var2);
-    } else {
-        ret = 0.0;
-    }
-    return ret 
-}
