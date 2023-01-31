@@ -28,7 +28,7 @@ simply run mrc in your terminal
 mrc
 ```
 This will launch a prompt that you can you as a calculator like that
-```bash
+```
 MRC: -> h for help, q for quit
 >> 2+2
 4
